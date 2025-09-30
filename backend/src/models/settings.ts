@@ -1,29 +1,18 @@
-import mongoose from 'mongoose';
+export interface Settings {
+  userId: string;
+  theme: 'light' | 'dark';
+  fontSize: number;
+  lineHeight: number;
+  translation: string;
+  versesPerPractice: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
-const settingsSchema = new mongoose.Schema({
-  userId: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  translation: {
-    type: String,
-    required: true,
-    default: 'niv',
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
-
-settingsSchema.pre('save', function(next) {
-  this.updatedAt = new Date();
-  next();
-});
-
-export const Settings = mongoose.model('Settings', settingsSchema); 
+export interface SettingsUpdate {
+  theme?: 'light' | 'dark';
+  fontSize?: number;
+  lineHeight?: number;
+  translation?: string;
+  versesPerPractice?: number;
+} 

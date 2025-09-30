@@ -1,11 +1,8 @@
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
-import mongoose from 'mongoose';
 import { verseRoutes } from './routes/verses';
 import { settingsRoutes } from './routes/settings';
-
-dotenv.config();
+import { connectToDatabase } from './db';
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -18,18 +15,19 @@ app.use(express.json());
 app.use('/api/verses', verseRoutes);
 app.use('/api/settings', settingsRoutes);
 
-// MongoDB connection
-const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/bibletyper';
+async function startServer() {
+  try {
+    // Connect to MongoDB
+    await connectToDatabase();
 
-mongoose.connect(mongoUri)
-  .then(() => {
-    console.log('Connected to MongoDB');
-  })
-  .catch((error) => {
-    console.error('MongoDB connection error:', error);
-  });
+    // Start the Express server
+    app.listen(port, () => {
+      console.log(`Server is running on port ${port}`);
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+}
 
-// Start server
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
-}); 
+startServer().catch(console.dir); 

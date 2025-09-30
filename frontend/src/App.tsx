@@ -5,6 +5,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import TypingPractice from './components/TypingPractice';
 import Header from './components/Header';
 import Settings from './components/Settings';
+import VerseDisplay from './components/VerseDisplay';
 
 const theme = createTheme({
   palette: {
@@ -18,7 +19,7 @@ const theme = createTheme({
   },
 });
 
-function App() {
+const App: React.FC = () => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -28,11 +29,12 @@ function App() {
           <Routes>
             <Route path="/" element={<TypingPractice />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/verse-display" element={<VerseDisplay />} />
           </Routes>
         </div>
       </Router>
     </ThemeProvider>
   );
-}
+};
 
 export default App; 

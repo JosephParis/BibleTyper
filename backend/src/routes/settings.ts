@@ -1,15 +1,34 @@
 import express from 'express';
-import { Settings } from '../models/settings';
+import { getCollections } from '../db';
+import { Settings, SettingsUpdate } from '../models/settings';
 
 const router = express.Router();
+const { settings } = getCollections();
 
 // Get user settings
-router.get('/', async (req, res) => {
+router.get('/:userId', async (req, res) => {
   try {
-    // TODO: Implement user authentication
-    const userId = 'default-user';
-    const settings = await Settings.findOne({ userId });
-    res.json(settings || { translation: 'niv' });
+    const { userId } = req.params;
+    const userSettings = await settings.findOne({ userId }) as Settings | null;
+    
+    if (!userSettings) {
+      // Create default settings if none exist
+      const defaultSettings: Settings = {
+        userId,
+        theme: 'light',
+        fontSize: 16,
+        lineHeight: 1.5,
+        translation: 'niv',
+        versesPerPractice: 3,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      
+      await settings.insertOne(defaultSettings);
+      return res.json(defaultSettings);
+    }
+    
+    res.json(userSettings);
   } catch (error) {
     console.error('Error fetching settings:', error);
     res.status(500).json({ error: 'Failed to fetch settings' });
@@ -17,19 +36,25 @@ router.get('/', async (req, res) => {
 });
 
 // Update user settings
-router.put('/', async (req, res) => {
+router.put('/:userId', async (req, res) => {
   try {
-    // TODO: Implement user authentication
-    const userId = 'default-user';
-    const { translation } = req.body;
+    const { userId } = req.params;
+    const updates: SettingsUpdate = {
+      ...req.body,
+      updatedAt: new Date()
+    };
 
-    const settings = await Settings.findOneAndUpdate(
+    const result = await settings.findOneAndUpdate(
       { userId },
-      { translation },
-      { upsert: true, new: true }
-    );
+      { $set: updates },
+      { returnDocument: 'after', upsert: true }
+    ) as Settings | null;
 
-    res.json(settings);
+    if (!result) {
+      return res.status(404).json({ error: 'Settings not found' });
+    }
+
+    res.json(result);
   } catch (error) {
     console.error('Error updating settings:', error);
     res.status(500).json({ error: 'Failed to update settings' });
