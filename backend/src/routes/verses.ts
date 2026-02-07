@@ -43,7 +43,7 @@ router.get('/random', async (req, res) => {
       id: 1,
       text: combinedText,
       reference: reference,
-      translation: 'KJV'
+      sourceText: 'Bible - KJV Translation'
     };
 
     console.log(`Returning ${verses.length} verses: ${reference}`);

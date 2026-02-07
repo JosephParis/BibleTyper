@@ -6,6 +6,7 @@ import TypingPractice from './components/TypingPractice';
 import Header from './components/Header';
 import Settings from './components/Settings';
 import VerseDisplay from './components/VerseDisplay';
+import DocumentUpload from './components/DocumentUpload';
 
 const theme = createTheme({
   palette: {
@@ -30,6 +31,7 @@ const App: React.FC = () => {
             <Route path="/" element={<TypingPractice />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/verse-display" element={<VerseDisplay />} />
+            <Route path="/documents" element={<DocumentUpload />} />
           </Routes>
         </div>
       </Router>

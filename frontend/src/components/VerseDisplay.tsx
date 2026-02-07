@@ -5,7 +5,7 @@ interface Verse {
   id: number;
   text: string;
   reference: string;
-  translation: string;
+  sourceText: string;
 }
 
 const VerseContainer = styled.div`
@@ -75,7 +75,7 @@ const VerseDisplay: React.FC = () => {
       {verses.map((verse) => (
         <VerseCard key={verse.id}>
           <VerseText>{verse.text}</VerseText>
-          <VerseReference>{verse.reference} - {verse.translation}</VerseReference>
+          <VerseReference>{verse.reference} - {verse.sourceText}</VerseReference>
         </VerseCard>
       ))}
     </VerseContainer>

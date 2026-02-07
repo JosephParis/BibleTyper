@@ -5,6 +5,9 @@ import path from 'path';
 const dbPath = path.join(__dirname, '..', 'bibletyper.db');
 const db = new Database(dbPath);
 
+// Enable foreign keys
+db.pragma('foreign_keys = ON');
+
 // Initialize database with settings table
 export function initializeDatabase() {
   try {
@@ -37,9 +40,40 @@ export function initializeDatabase() {
       ON verses(book, chapter)
     `);
 
+    // Create documents table
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS documents (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        original_filename TEXT NOT NULL,
+        file_type TEXT NOT NULL,
+        chunk_count INTEGER NOT NULL DEFAULT 0,
+        uploaded_at TEXT NOT NULL DEFAULT (datetime('now'))
+      )
+    `);
+
+    // Create document_chunks table
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS document_chunks (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        document_id INTEGER NOT NULL,
+        chunk_index INTEGER NOT NULL,
+        text TEXT NOT NULL,
+        label TEXT NOT NULL,
+        FOREIGN KEY (document_id) REFERENCES documents(id) ON DELETE CASCADE
+      )
+    `);
+
+    // Create index for document_chunks
+    db.exec(`
+      CREATE INDEX IF NOT EXISTS idx_document_chunks_document_id
+      ON document_chunks(document_id)
+    `);
+
     // Insert default settings if they don't exist
     const stmt = db.prepare('INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)');
     stmt.run('versesPerPractice', '3');
+    stmt.run('activeSourceText', 'bible');
 
     console.log('Successfully initialized SQLite database!');
   } catch (error) {
@@ -112,6 +146,92 @@ export function getRandomVerses(count: number): Array<{ book: string; chapter: n
 export function insertVerse(book: string, chapter: number, verse: number, text: string) {
   const stmt = db.prepare('INSERT OR IGNORE INTO verses (book, chapter, verse, text) VALUES (?, ?, ?, ?)');
   stmt.run(book, chapter, verse, text);
+}
+
+// Insert a document with its chunks (transactional)
+export function insertDocumentWithChunks(
+  name: string,
+  originalFilename: string,
+  fileType: string,
+  chunks: Array<{ text: string; label: string }>
+): number {
+  const insertDoc = db.prepare(
+    'INSERT INTO documents (name, original_filename, file_type, chunk_count) VALUES (?, ?, ?, ?)'
+  );
+  const insertChunk = db.prepare(
+    'INSERT INTO document_chunks (document_id, chunk_index, text, label) VALUES (?, ?, ?, ?)'
+  );
+
+  const transaction = db.transaction(() => {
+    const result = insertDoc.run(name, originalFilename, fileType, chunks.length);
+    const docId = result.lastInsertRowid as number;
+
+    for (let i = 0; i < chunks.length; i++) {
+      insertChunk.run(docId, i, chunks[i].text, chunks[i].label);
+    }
+
+    return docId;
+  });
+
+  return transaction();
+}
+
+// Get all documents
+export function getDocuments(): Array<{
+  id: number;
+  name: string;
+  original_filename: string;
+  file_type: string;
+  chunk_count: number;
+  uploaded_at: string;
+}> {
+  const stmt = db.prepare('SELECT * FROM documents ORDER BY uploaded_at DESC');
+  return stmt.all() as any[];
+}
+
+// Get a single document by ID
+export function getDocument(id: number): {
+  id: number;
+  name: string;
+  original_filename: string;
+  file_type: string;
+  chunk_count: number;
+  uploaded_at: string;
+} | undefined {
+  const stmt = db.prepare('SELECT * FROM documents WHERE id = ?');
+  return stmt.get(id) as any;
+}
+
+// Delete a document (chunks cascade)
+export function deleteDocument(id: number): boolean {
+  const stmt = db.prepare('DELETE FROM documents WHERE id = ?');
+  const result = stmt.run(id);
+  return result.changes > 0;
+}
+
+// Rename a document
+export function renameDocument(id: number, newName: string): boolean {
+  const stmt = db.prepare('UPDATE documents SET name = ? WHERE id = ?');
+  const result = stmt.run(newName, id);
+  return result.changes > 0;
+}
+
+// Get a random chunk from a document
+export function getRandomDocumentChunk(documentId: number): {
+  id: number;
+  text: string;
+  label: string;
+  document_name: string;
+} | undefined {
+  const stmt = db.prepare(`
+    SELECT dc.id, dc.text, dc.label, d.name as document_name
+    FROM document_chunks dc
+    JOIN documents d ON dc.document_id = d.id
+    WHERE dc.document_id = ?
+    ORDER BY RANDOM()
+    LIMIT 1
+  `);
+  return stmt.get(documentId) as any;
 }
 
 // Close database connection

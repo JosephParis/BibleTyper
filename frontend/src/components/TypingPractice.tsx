@@ -14,11 +14,12 @@ interface Verse {
   id: number;
   text: string;
   reference: string;
-  translation: string;
+  sourceText: string;
 }
 
 interface Settings {
   versesPerPractice: number;
+  activeSourceText: string;
 }
 
 const VerseContainer = styled.div`
@@ -225,12 +226,15 @@ const TypingPractice: React.FC = () => {
   const [wpm, setWpm] = useState(0);
   const [accuracy, setAccuracy] = useState(100);
   const [versesPerPractice, setVersesPerPractice] = useState(3);
+  const [activeSourceText, setActiveSourceText] = useState('bible');
+  const [documentNotFound, setDocumentNotFound] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const fetchSettings = async () => {
     try {
       const response = await axios.get<Settings>('http://localhost:3001/api/settings');
       setVersesPerPractice(response.data.versesPerPractice);
+      setActiveSourceText(response.data.activeSourceText || 'bible');
     } catch (err) {
       console.error('Error fetching settings:', err);
     }
@@ -240,20 +244,27 @@ const TypingPractice: React.FC = () => {
     try {
       setIsLoading(true);
       setError(null);
-      const response = await axios.get<Verse[]>(`http://localhost:3001/api/verses/random?count=${versesPerPractice}`);
+      setDocumentNotFound(false);
+
+      let url: string;
+      if (activeSourceText === 'bible') {
+        url = `http://localhost:3001/api/verses/random?count=${versesPerPractice}`;
+      } else {
+        url = `http://localhost:3001/api/documents/${activeSourceText}/random`;
+      }
+
+      const response = await axios.get<Verse[]>(url);
       setVerses(response.data);
       setUserInput('');
       setStartTime(null);
       setWpm(0);
       setAccuracy(100);
       setCurrentVerseIndex(0);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error fetching verses:', err);
-      if (err instanceof Error) {
-        console.error('Error details:', {
-          message: err.message,
-          stack: err.stack
-        });
+      if (err.response?.status === 404 && activeSourceText !== 'bible') {
+        setDocumentNotFound(true);
+      } else if (err instanceof Error) {
         setError(`Failed to fetch verses: ${err.message}`);
       } else {
         setError('Failed to fetch verses: Unknown error occurred');
@@ -268,10 +279,10 @@ const TypingPractice: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (versesPerPractice > 0) {
+    if (activeSourceText === 'bible' ? versesPerPractice > 0 : true) {
       fetchVerses();
     }
-  }, [versesPerPractice]);
+  }, [versesPerPractice, activeSourceText]);
 
   useEffect(() => {
     if (inputRef.current) {
@@ -419,6 +430,27 @@ const TypingPractice: React.FC = () => {
     );
   }
 
+  if (documentNotFound) {
+    return (
+      <Container maxWidth="md" sx={{ mt: 4 }}>
+        <Paper elevation={3} sx={{ p: 3, textAlign: 'center' }}>
+          <Typography gutterBottom>
+            The selected document is no longer available.
+          </Typography>
+          <Button variant="contained" href="/documents" sx={{ mr: 1 }}>
+            Manage Documents
+          </Button>
+          <Button variant="outlined" onClick={async () => {
+            await axios.post('http://localhost:3001/api/settings', { activeSourceText: 'bible' });
+            setActiveSourceText('bible');
+          }}>
+            Switch to Bible
+          </Button>
+        </Paper>
+      </Container>
+    );
+  }
+
   if (error) {
     return (
       <Container maxWidth="md" sx={{ mt: 4 }}>
@@ -446,7 +478,7 @@ const TypingPractice: React.FC = () => {
         {currentVerse && (
           <Box sx={{ mb: 3 }}>
             <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold' }}>
-              {currentVerse.reference} ({currentVerse.translation})
+              {currentVerse.reference} ({currentVerse.sourceText})
             </Typography>
             {renderReferenceText()}
           </Box>
@@ -473,7 +505,7 @@ const TypingPractice: React.FC = () => {
         
         <Box sx={{ mt: 2, textAlign: 'center' }}>
           <Button variant="outlined" onClick={fetchVerses}>
-            New Verses
+            {activeSourceText === 'bible' ? 'New Verses' : 'Next Passage'}
           </Button>
         </Box>
       </Paper>
