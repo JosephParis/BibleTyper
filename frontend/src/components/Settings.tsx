@@ -3,33 +3,19 @@ import {
   Container,
   Paper,
   Typography,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   Box,
   Button,
-  SelectChangeEvent,
   TextField,
   Slider,
 } from '@mui/material';
 import axios from 'axios';
 
 interface Settings {
-  translation: string;
   versesPerPractice: number;
 }
 
-const translations = [
-  { value: 'niv', label: 'New International Version (NIV)' },
-  { value: 'kjv', label: 'King James Version (KJV)' },
-  { value: 'esv', label: 'English Standard Version (ESV)' },
-  { value: 'nlt', label: 'New Living Translation (NLT)' },
-];
-
 const Settings: React.FC = () => {
   const [settings, setSettings] = useState<Settings>({
-    translation: 'niv',
     versesPerPractice: 3
   });
   const [versesInput, setVersesInput] = useState<string>('3');
@@ -47,10 +33,6 @@ const Settings: React.FC = () => {
     };
     loadSettings();
   }, []);
-
-  const handleTranslationChange = (event: SelectChangeEvent) => {
-    setSettings(prev => ({ ...prev, translation: event.target.value }));
-  };
 
   const handleVersesChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
@@ -105,21 +87,6 @@ const Settings: React.FC = () => {
         </Typography>
 
         <Box sx={{ mt: 2 }}>
-          <FormControl fullWidth sx={{ mb: 3 }}>
-            <InputLabel>Bible Translation</InputLabel>
-            <Select
-              value={settings.translation}
-              label="Bible Translation"
-              onChange={handleTranslationChange}
-            >
-              {translations.map((translation) => (
-                <MenuItem key={translation.value} value={translation.value}>
-                  {translation.label}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
           <Box sx={{ mb: 3 }}>
             <Typography gutterBottom>
               Verses per Practice

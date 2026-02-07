@@ -6,7 +6,7 @@ A typing practice application that helps users improve their typing speed and ac
 
 - Practice typing with randomly selected Bible verses
 - Track typing speed (WPM) and accuracy
-- Support for multiple Bible translations (NIV by default)
+- Uses King James Version (KJV)
 - User progress tracking
 - Modern, responsive UI
 
@@ -14,8 +14,8 @@ A typing practice application that helps users improve their typing speed and ac
 
 - Frontend: React + TypeScript
 - Backend: Node.js + Express
-- Database: MongoDB
-- Bible API: Bible.org API
+- Database: SQLite (stores both settings and all KJV verses locally)
+- Bible Text: King James Version (public domain, stored locally)
 
 ## Setup Instructions
 
@@ -30,25 +30,23 @@ A typing practice application that helps users improve their typing speed and ac
    cd ../backend
    npm install
    ```
-3. Create a `.env` file in the backend directory with your MongoDB connection string and Bible API key
+3. Import KJV Bible verses (first time only):
+   ```bash
+   cd backend
+   npm run import-kjv
+   ```
+   This will download all 31,102 KJV verses and store them in the local SQLite database (~3-5 MB).
+
 4. Start the development servers:
    ```bash
    # Start backend server
    cd backend
    npm run dev
 
-   # Start frontend server
+   # Start frontend server (in a new terminal)
    cd frontend
    npm start
    ```
-
-## Environment Variables
-
-Create a `.env` file in the backend directory with the following variables:
-```
-MONGODB_URI=your_mongodb_connection_string
-BIBLE_API_KEY=your_bible_api_key
-```
 
 ## License
 

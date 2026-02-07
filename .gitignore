@@ -30,4 +30,17 @@ yarn-error.log*
 
 # OS
 .DS_Store
-Thumbs.db 
+Thumbs.db
+
+# Claude Code
+.claude/
+
+# Build artifacts
+backend/dist/
+frontend/build/
+frontend/public/
+
+# Database
+*.db
+*.db-shm
+*.db-wal

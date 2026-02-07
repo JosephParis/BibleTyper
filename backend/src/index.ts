@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { verseRoutes } from './routes/verses';
 import { settingsRoutes } from './routes/settings';
-import { connectToDatabase } from './db';
+import { initializeDatabase } from './db';
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -15,10 +15,10 @@ app.use(express.json());
 app.use('/api/verses', verseRoutes);
 app.use('/api/settings', settingsRoutes);
 
-async function startServer() {
+function startServer() {
   try {
-    // Connect to MongoDB
-    await connectToDatabase();
+    // Initialize SQLite database
+    initializeDatabase();
 
     // Start the Express server
     app.listen(port, () => {
@@ -30,4 +30,4 @@ async function startServer() {
   }
 }
 
-startServer().catch(console.dir); 
+startServer(); 
