@@ -22,6 +22,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import ArticleIcon from '@mui/icons-material/Article';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
@@ -235,6 +236,13 @@ const DocumentUpload: React.FC = () => {
                     onClick={() => handlePractice(doc)}
                   >
                     Practice
+                  </Button>
+                  <Button
+                    size="small"
+                    startIcon={<ArticleIcon />}
+                    onClick={() => navigate(`/documents/${doc.id}/edit`)}
+                  >
+                    Edit Content
                   </Button>
                   <IconButton size="small" onClick={() => handleRenameClick(doc)} title="Rename">
                     <EditIcon fontSize="small" />

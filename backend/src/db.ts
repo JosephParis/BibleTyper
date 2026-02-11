@@ -216,6 +216,26 @@ export function renameDocument(id: number, newName: string): boolean {
   return result.changes > 0;
 }
 
+// Get all chunks for a document
+export function getDocumentChunks(documentId: number): Array<{
+  id: number;
+  chunk_index: number;
+  text: string;
+  label: string;
+}> {
+  const stmt = db.prepare(
+    'SELECT id, chunk_index, text, label FROM document_chunks WHERE document_id = ? ORDER BY chunk_index'
+  );
+  return stmt.all(documentId) as any[];
+}
+
+// Update a chunk's text
+export function updateChunk(chunkId: number, newText: string): boolean {
+  const stmt = db.prepare('UPDATE document_chunks SET text = ? WHERE id = ?');
+  const result = stmt.run(newText, chunkId);
+  return result.changes > 0;
+}
+
 // Get a random chunk from a document
 export function getRandomDocumentChunk(documentId: number): {
   id: number;

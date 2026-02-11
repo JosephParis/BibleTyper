@@ -8,6 +8,8 @@ import {
   getDocument,
   deleteDocument,
   renameDocument,
+  getDocumentChunks,
+  updateChunk,
   getRandomDocumentChunk,
   getSettings,
   updateSetting,
@@ -160,6 +162,46 @@ router.patch('/:id', (req, res) => {
   } catch (error) {
     console.error('Error renaming document:', error);
     res.status(500).json({ error: 'Failed to rename document' });
+  }
+});
+
+// GET /api/documents/:id/chunks
+router.get('/:id/chunks', (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const doc = getDocument(id);
+
+    if (!doc) {
+      return res.status(404).json({ error: 'Document not found' });
+    }
+
+    const chunks = getDocumentChunks(id);
+    res.json(chunks);
+  } catch (error) {
+    console.error('Error fetching document chunks:', error);
+    res.status(500).json({ error: 'Failed to fetch document chunks' });
+  }
+});
+
+// PATCH /api/documents/:id/chunks/:chunkId
+router.patch('/:id/chunks/:chunkId', (req, res) => {
+  try {
+    const chunkId = parseInt(req.params.chunkId);
+    const { text } = req.body;
+
+    if (!text || typeof text !== 'string' || text.trim().length === 0) {
+      return res.status(400).json({ error: 'Text is required' });
+    }
+
+    const updated = updateChunk(chunkId, text.trim());
+    if (!updated) {
+      return res.status(404).json({ error: 'Chunk not found' });
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error updating chunk:', error);
+    res.status(500).json({ error: 'Failed to update chunk' });
   }
 });
 

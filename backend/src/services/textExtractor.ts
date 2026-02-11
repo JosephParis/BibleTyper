@@ -20,10 +20,10 @@ export async function extractText(filePath: string, fileType: string): Promise<s
     }
 
     case '.pdf': {
-      const pdfParse = require('pdf-parse');
+      const { extractText: extractPdfText } = await import('unpdf');
       const dataBuffer = fs.readFileSync(filePath);
-      const data = await pdfParse(dataBuffer);
-      return data.text;
+      const { text } = await extractPdfText(new Uint8Array(dataBuffer));
+      return text.join('\n');
     }
 
     case '.docx': {
