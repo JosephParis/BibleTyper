@@ -2,7 +2,7 @@ import Database from 'better-sqlite3';
 import path from 'path';
 
 // Create SQLite database instance
-const dbPath = path.join(__dirname, '..', 'bibletyper.db');
+const dbPath = path.join(__dirname, '..', 'type2mem.db');
 const db = new Database(dbPath);
 
 // Enable foreign keys

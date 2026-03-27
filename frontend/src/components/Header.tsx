@@ -7,7 +7,7 @@ const Header: React.FC = () => {
     <AppBar position="static">
       <Toolbar>
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-          BibleTyper
+          Type2Mem
         </Typography>
         <Box>
           <Button color="inherit" component={RouterLink} to="/">

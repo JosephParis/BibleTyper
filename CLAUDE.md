@@ -1,19 +1,19 @@
-# BibleTyper - Project Guide
+# Type2Mem - Project Guide
 
 ## Overview
 
-BibleTyper is a full-stack typing practice app for Bible verses. Users type KJV Bible verses, get real-time WPM and accuracy feedback, and can configure practice settings. All data is stored locally in SQLite.
+Type2Mem is a full-stack typing practice app for Bible verses. Users type KJV Bible verses, get real-time WPM and accuracy feedback, and can configure practice settings. All data is stored locally in SQLite.
 
 ## Tech Stack
 
 - **Frontend:** React 18, TypeScript, Material-UI 5, Styled-Components, React Router 6, Axios
 - **Backend:** Node.js, Express 4, TypeScript, better-sqlite3 (SQLite), Axios
-- **Database:** SQLite file (`bibletyper.db`) with `settings` and `verses` tables
+- **Database:** SQLite file (`type2mem.db`) with `settings` and `verses` tables
 
 ## Project Structure
 
 ```
-BibleTyper/
+Type2Mem/
 ├── backend/
 │   ├── src/
 │   │   ├── index.ts              # Express server entry point (port 3001)

@@ -1,7 +1,7 @@
 {
-  "name": "bibletyper-backend",
+  "name": "type2mem-backend",
   "version": "1.0.0",
-  "description": "Backend for BibleTyper application",
+  "description": "Backend for Type2Mem application",
   "main": "dist/index.js",
   "scripts": {
     "start": "node dist/index.js",

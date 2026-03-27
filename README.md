@@ -1,4 +1,4 @@
-# BibleTyper
+# Type2Mem
 
 A typing practice application that helps users improve their typing speed and accuracy while engaging with Bible verses.
 
