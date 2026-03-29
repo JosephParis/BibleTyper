@@ -48,7 +48,7 @@ const VerseDisplay: React.FC = () => {
 
   const fetchVerses = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/verses/random?count=5');
+      const response = await fetch('/api/verses/random?count=5');
       const data = await response.json();
       setVerses(data);
     } catch (error) {

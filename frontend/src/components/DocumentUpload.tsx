@@ -33,6 +33,7 @@ interface Document {
   file_type: string;
   chunk_count: number;
   uploaded_at: string;
+  is_public?: boolean;
 }
 
 const ACCEPTED_TYPES = '.pdf,.txt,.json,.docx,.xlsx,.csv,.md,.html';
@@ -50,7 +51,7 @@ const DocumentUpload: React.FC = () => {
 
   const fetchDocuments = useCallback(async () => {
     try {
-      const response = await axios.get<Document[]>('http://localhost:3001/api/documents');
+      const response = await axios.get<Document[]>('/api/documents');
       setDocuments(response.data);
     } catch (error) {
       console.error('Failed to fetch documents:', error);
@@ -67,7 +68,7 @@ const DocumentUpload: React.FC = () => {
       const formData = new FormData();
       formData.append('file', file);
 
-      await axios.post('http://localhost:3001/api/documents/upload', formData, {
+      await axios.post('/api/documents/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
@@ -103,7 +104,7 @@ const DocumentUpload: React.FC = () => {
 
   const handlePractice = async (doc: Document) => {
     try {
-      await axios.post('http://localhost:3001/api/settings', {
+      await axios.post('/api/settings', {
         activeSourceText: String(doc.id),
       });
       navigate('/');
@@ -120,7 +121,7 @@ const DocumentUpload: React.FC = () => {
   const handleDeleteConfirm = async () => {
     if (!selectedDoc) return;
     try {
-      await axios.delete(`http://localhost:3001/api/documents/${selectedDoc.id}`);
+      await axios.delete(`/api/documents/${selectedDoc.id}`);
       await fetchDocuments();
     } catch (error) {
       console.error('Failed to delete document:', error);
@@ -138,7 +139,7 @@ const DocumentUpload: React.FC = () => {
   const handleRenameConfirm = async () => {
     if (!selectedDoc || !newName.trim()) return;
     try {
-      await axios.patch(`http://localhost:3001/api/documents/${selectedDoc.id}`, {
+      await axios.patch(`/api/documents/${selectedDoc.id}`, {
         name: newName.trim(),
       });
       await fetchDocuments();
@@ -219,14 +220,20 @@ const DocumentUpload: React.FC = () => {
                     <Typography variant="subtitle1" sx={{ fontWeight: 'bold', flexGrow: 1 }}>
                       {doc.name}
                     </Typography>
-                    <Chip
-                      label={doc.file_type.toUpperCase().replace('.', '')}
-                      size="small"
-                      variant="outlined"
-                    />
+                    {doc.is_public && (
+                      <Chip label="Built-in" size="small" color="primary" variant="outlined" />
+                    )}
+                    {!doc.is_public && (
+                      <Chip
+                        label={doc.file_type.toUpperCase().replace('.', '')}
+                        size="small"
+                        variant="outlined"
+                      />
+                    )}
                   </Box>
                   <Typography variant="body2" color="text.secondary">
-                    {doc.chunk_count} passage{doc.chunk_count !== 1 ? 's' : ''} &middot; Uploaded {formatDate(doc.uploaded_at)}
+                    {doc.chunk_count} passage{doc.chunk_count !== 1 ? 's' : ''}
+                    {!doc.is_public && <> &middot; Uploaded {formatDate(doc.uploaded_at)}</>}
                   </Typography>
                 </CardContent>
                 <CardActions>
@@ -237,19 +244,23 @@ const DocumentUpload: React.FC = () => {
                   >
                     Practice
                   </Button>
-                  <Button
-                    size="small"
-                    startIcon={<ArticleIcon />}
-                    onClick={() => navigate(`/documents/${doc.id}/edit`)}
-                  >
-                    Edit Content
-                  </Button>
-                  <IconButton size="small" onClick={() => handleRenameClick(doc)} title="Rename">
-                    <EditIcon fontSize="small" />
-                  </IconButton>
-                  <IconButton size="small" onClick={() => handleDeleteClick(doc)} title="Delete" color="error">
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
+                  {!doc.is_public && (
+                    <>
+                      <Button
+                        size="small"
+                        startIcon={<ArticleIcon />}
+                        onClick={() => navigate(`/documents/${doc.id}/edit`)}
+                      >
+                        Edit Content
+                      </Button>
+                      <IconButton size="small" onClick={() => handleRenameClick(doc)} title="Rename">
+                        <EditIcon fontSize="small" />
+                      </IconButton>
+                      <IconButton size="small" onClick={() => handleDeleteClick(doc)} title="Delete" color="error">
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    </>
+                  )}
                 </CardActions>
               </Card>
             ))}

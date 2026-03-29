@@ -15,7 +15,7 @@ import {
 import { Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
 
-interface Settings {
+interface AppSettings {
   versesPerPractice: number;
   activeSourceText: string;
 }
@@ -28,7 +28,7 @@ interface Document {
 }
 
 const Settings: React.FC = () => {
-  const [settings, setSettings] = useState<Settings>({
+  const [settings, setSettings] = useState<AppSettings>({
     versesPerPractice: 3,
     activeSourceText: 'bible',
   });
@@ -39,8 +39,8 @@ const Settings: React.FC = () => {
     const loadData = async () => {
       try {
         const [settingsRes, docsRes] = await Promise.all([
-          axios.get<Settings>('http://localhost:3001/api/settings'),
-          axios.get<Document[]>('http://localhost:3001/api/documents'),
+          axios.get<AppSettings>('/api/settings'),
+          axios.get<Document[]>('/api/documents'),
         ]);
         setSettings(settingsRes.data);
         setVersesInput(settingsRes.data.versesPerPractice.toString());
@@ -92,7 +92,7 @@ const Settings: React.FC = () => {
         saveData.versesPerPractice = Math.min(Math.max(settings.versesPerPractice, 1), 10);
       }
 
-      await axios.post('http://localhost:3001/api/settings', saveData);
+      await axios.post('/api/settings', saveData);
 
       if (saveData.versesPerPractice !== undefined) {
         setSettings(prev => ({ ...prev, versesPerPractice: saveData.versesPerPractice }));

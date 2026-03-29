@@ -47,3 +47,5 @@ frontend/public/
 
 # Uploads
 backend/uploads/
+.vercel
+.env*.local

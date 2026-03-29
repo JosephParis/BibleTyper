@@ -46,8 +46,8 @@ const DocumentEdit: React.FC = () => {
   const fetchData = useCallback(async () => {
     try {
       const [docRes, chunksRes] = await Promise.all([
-        axios.get<Document>(`http://localhost:3001/api/documents/${id}`),
-        axios.get<Chunk[]>(`http://localhost:3001/api/documents/${id}/chunks`),
+        axios.get<Document>(`/api/documents/${id}`),
+        axios.get<Chunk[]>(`/api/documents/${id}/chunks`),
       ]);
       setDocument(docRes.data);
       setChunks(chunksRes.data);
@@ -73,7 +73,7 @@ const DocumentEdit: React.FC = () => {
 
     setSavingChunkId(chunk.id);
     try {
-      await axios.patch(`http://localhost:3001/api/documents/${id}/chunks/${chunk.id}`, {
+      await axios.patch(`/api/documents/${id}/chunks/${chunk.id}`, {
         text: newText,
       });
       // Update local state so the chunk reflects the saved text
